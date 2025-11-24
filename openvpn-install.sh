@@ -535,7 +535,7 @@ function installQuestions() {
 		echo "Choose which cipher you want to use for the control channel:"
 		case $CERT_TYPE in
 		1)
-			echo "   1) ECDHE-ECDSA-AES-128-GCM-SHA256 (recommended)" ecdhe_ecdsa_with_chacha20_poly1305_sha256
+			echo "   1) ECDHE-ECDSA-AES-128-GCM-SHA256 (recommended)"
 			echo "   2) ECDHE-ECDSA-AES-256-GCM-SHA384"
 			echo "   3) ECDHE-ECDSA-CHACHA20-POLY1305"
 			until [[ $CC_CIPHER_CHOICE =~ ^[1-3]$ ]]; do
@@ -962,6 +962,8 @@ verb 3" >>/etc/openvpn/server.conf
 
 	# Enable routing
 	echo 'net.ipv4.ip_forward=1' >/etc/sysctl.d/99-openvpn.conf
+	echo 'net.core.default_qdisc=fq' >>/etc/sysctl.d/99-openvpn.conf
+	echo 'net.ipv4.tcp_congestion_control=bbr' >>/etc/sysctl.d/99-openvpn.conf
 	if [[ $IPV6_SUPPORT == 'y' ]]; then
 		echo 'net.ipv6.conf.all.forwarding=1' >>/etc/sysctl.d/99-openvpn.conf
 	fi
