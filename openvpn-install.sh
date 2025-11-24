@@ -447,32 +447,36 @@ function installQuestions() {
 	else
 		echo ""
 		echo "Choose which cipher you want to use for the data channel:"
-		echo "   1) AES-128-GCM (recommended)"
-		echo "   2) AES-192-GCM"
-		echo "   3) AES-256-GCM"
-		echo "   4) AES-128-CBC"
-		echo "   5) AES-192-CBC"
-		echo "   6) AES-256-CBC"
-		until [[ $CIPHER_CHOICE =~ ^[1-6]$ ]]; do
-			read -rp "Cipher [1-6]: " -e -i 1 CIPHER_CHOICE
+		echo "   1) CHACHA20-POLY1305 (recommended)"
+		echo "   2) AES-128-GCM"
+		echo "   3) AES-192-GCM"
+		echo "   4) AES-256-GCM"
+		echo "   5) AES-128-CBC"
+		echo "   6) AES-192-CBC"
+		echo "   7) AES-256-CBC"
+		until [[ $CIPHER_CHOICE =~ ^[1-7]$ ]]; do
+			read -rp "Cipher [1-7]: " -e -i 1 CIPHER_CHOICE
 		done
 		case $CIPHER_CHOICE in
 		1)
-			CIPHER="AES-128-GCM"
+			CIPHER="CHACHA20-POLY1305"
 			;;
 		2)
-			CIPHER="AES-192-GCM"
+			CIPHER="AES-128-GCM"
 			;;
 		3)
-			CIPHER="AES-256-GCM"
+			CIPHER="AES-192-GCM"
 			;;
 		4)
-			CIPHER="AES-128-CBC"
+			CIPHER="AES-256-GCM"
 			;;
 		5)
-			CIPHER="AES-192-CBC"
+			CIPHER="AES-128-CBC"
 			;;
 		6)
+			CIPHER="AES-256-CBC"
+			;;
+		7)
 			CIPHER="AES-256-CBC"
 			;;
 		esac
@@ -531,10 +535,11 @@ function installQuestions() {
 		echo "Choose which cipher you want to use for the control channel:"
 		case $CERT_TYPE in
 		1)
-			echo "   1) ECDHE-ECDSA-AES-128-GCM-SHA256 (recommended)"
+			echo "   1) ECDHE-ECDSA-AES-128-GCM-SHA256 (recommended)" ecdhe_ecdsa_with_chacha20_poly1305_sha256
 			echo "   2) ECDHE-ECDSA-AES-256-GCM-SHA384"
-			until [[ $CC_CIPHER_CHOICE =~ ^[1-2]$ ]]; do
-				read -rp"Control channel cipher [1-2]: " -e -i 1 CC_CIPHER_CHOICE
+			echo "   3) ECDHE-ECDSA-CHACHA20-POLY1305"
+			until [[ $CC_CIPHER_CHOICE =~ ^[1-3]$ ]]; do
+				read -rp"Control channel cipher [1-3]: " -e -i 1 CC_CIPHER_CHOICE
 			done
 			case $CC_CIPHER_CHOICE in
 			1)
@@ -543,13 +548,17 @@ function installQuestions() {
 			2)
 				CC_CIPHER="TLS-ECDHE-ECDSA-WITH-AES-256-GCM-SHA384"
 				;;
+			3)
+				CC_CIPHER="TLS-ECDHE-ECDSA-CHACHA20-POLY1305"
+				;;
 			esac
 			;;
 		2)
 			echo "   1) ECDHE-RSA-AES-128-GCM-SHA256 (recommended)"
 			echo "   2) ECDHE-RSA-AES-256-GCM-SHA384"
-			until [[ $CC_CIPHER_CHOICE =~ ^[1-2]$ ]]; do
-				read -rp"Control channel cipher [1-2]: " -e -i 1 CC_CIPHER_CHOICE
+			echo "   3) ECDHE-RSA-CHACHA20-POLY1305"
+			until [[ $CC_CIPHER_CHOICE =~ ^[1-3]$ ]]; do
+				read -rp"Control channel cipher [1-3]: " -e -i 1 CC_CIPHER_CHOICE
 			done
 			case $CC_CIPHER_CHOICE in
 			1)
@@ -557,6 +566,9 @@ function installQuestions() {
 				;;
 			2)
 				CC_CIPHER="TLS-ECDHE-RSA-WITH-AES-256-GCM-SHA384"
+				;;
+			3)
+				CC_CIPHER="TLS-ECDHE-RSA-CHACHA20-POLY1305"
 				;;
 			esac
 			;;
@@ -618,6 +630,8 @@ function installQuestions() {
 			echo "The digest algorithm authenticates data channel packets and tls-auth packets from the control channel."
 		elif [[ $CIPHER =~ GCM$ ]]; then
 			echo "The digest algorithm authenticates tls-auth packets from the control channel."
+		elif [[ $CIPHER =~ CHACHA$ ]]; then
+			echo "ChaCha20-Poly1305 authenticates packets using the Poly1305 MAC."
 		fi
 		echo "Which digest algorithm do you want to use for HMAC?"
 		echo "   1) SHA-256 (recommended)"
@@ -820,6 +834,7 @@ group $NOGROUP
 persist-key
 persist-tun
 keepalive 10 120
+tun-mtu 1400
 topology subnet
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt" >>/etc/openvpn/server.conf
