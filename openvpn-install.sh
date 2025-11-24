@@ -694,8 +694,10 @@ function installOpenVPN() {
 
 	# Get the "public" interface from the default route
 	NIC=$(ip -4 route ls | grep default | grep -Po '(?<=dev )(\S+)' | head -1)
-	if [[ -z $NIC ]] && [[ $IPV6_SUPPORT == 'y' ]]; then
+	if [[ $IPV6_SUPPORT == 'y' ]]; then
 		NIC6=$(ip -6 route show default | sed -ne 's/^default .* dev \([^ ]*\) .*$/\1/p')
+		if [[ -z $NIC6 ]]; then
+			echo "NO IPv6 is enabled on this server."
 	fi
 
 	# $NIC can not be empty for script rm-openvpn-rules.sh
