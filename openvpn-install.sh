@@ -698,6 +698,7 @@ function installOpenVPN() {
 		NIC6=$(ip -6 route show default | sed -ne 's/^default .* dev \([^ ]*\) .*$/\1/p')
 		if [[ -z $NIC6 ]]; then
 			echo "NO IPv6 is enabled on this server."
+		fi
 	fi
 
 	# $NIC can not be empty for script rm-openvpn-rules.sh
@@ -1056,6 +1057,7 @@ ip6tables -D INPUT -i $NIC6 -p $PROTOCOL --dport $PORT -j ACCEPT" >>/etc/iptable
 	chmod +x /etc/iptables/rm-openvpn-rules.sh
 
 	# Handle the rules via a systemd script
+''
 	echo "[Unit]
 Description=iptables rules for OpenVPN
 Before=network-online.target
